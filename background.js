@@ -1,35 +1,29 @@
-// 画像キャッシュを保持する
-const cacheKey = 'IMG_data_saver';
-
-// ローカルストレージからキャッシュを取得
-let cache = JSON.parse(localStorage.getItem(cacheKey)) || {};
+const CACHE_NAME = 'imageCache';
 
 // 画像リクエストのリスナー
-chrome.webRequest.onBeforeRequest.addListener(
-  (details) => {
-    const url = details.url;
-    if (cache[url]) {
-      // キャッシュがあればリダイレクト
-      return { redirectUrl: cache[url] };
-    }
-  },
-  { urls: ["<all_urls>"], types: ["image"] },
-  ["blocking"]
-);
+self.addEventListener('fetch', (event) => {
+  const url = event.request.url;
 
-// リクエスト完了後にキャッシュを更新
-chrome.webRequest.onCompleted.addListener(
-  async (details) => {
-    if (details.statusCode === 200) {
-      const url = details.url;
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      
-      // キャッシュに保存
-      cache[url] = objectUrl;
-      localStorage.setItem(cacheKey, JSON.stringify(cache));
-    }
-  },
-  { urls: ["<all_urls>"], types: ["image"] }
-);
+  event.respondWith(
+    caches.match(url).then((cachedResponse) => {
+      // キャッシュがあればリターン
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      // リクエストをネットワークへ
+      return fetch(event.request).then((response) => {
+        // レスポンスがキャッシュ可能か確認
+        if (response && response.status === 200) {
+          // キャッシュに保存
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(url, responseClone);
+          });
+        }
+        
+        return response;
+      });
+    })
+  );
+});
