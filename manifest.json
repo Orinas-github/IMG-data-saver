@@ -1,13 +1,12 @@
-   {
-     "manifest_version": 3,
-     "name": "Image Cache Saver",
-     "version": "1.0",
-     "permissions": ["storage", "webRequest", "webRequestBlocking", "<all_urls>"],
-     "background": {
-       "service_worker": "background.js"
-     },
-     "action": {
-       "default_popup": "popup.html"
-     }
-   }
-   
+{
+  "manifest_version": 3,
+  "name": "Image Cache Saver",
+  "version": "1.0",
+  "permissions": ["storage", "webRequest", "webRequestBlocking", "<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

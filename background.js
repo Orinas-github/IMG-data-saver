@@ -1,30 +1,35 @@
-const cache = {};
+// 画像キャッシュを保持する
+const cacheKey = 'IMG_data_saver';
 
+// ローカルストレージからキャッシュを取得
+let cache = JSON.parse(localStorage.getItem(cacheKey)) || {};
+
+// 画像リクエストのリスナー
 chrome.webRequest.onBeforeRequest.addListener(
   (details) => {
-    // 画像のリクエストをチェック
-    if (details.url.match(/\.(jpeg|jpg|gif|png)$/)) {
-      // 既にキャッシュされてるか確認
-      if (cache[details.url]) {
-        return { redirectUrl: cache[details.url] };
-      }
+    const url = details.url;
+    if (cache[url]) {
+      // キャッシュがあればリダイレクト
+      return { redirectUrl: cache[url] };
     }
   },
-  { urls: ["<all_urls>"] },
+  { urls: ["<all_urls>"], types: ["image"] },
   ["blocking"]
 );
 
+// リクエスト完了後にキャッシュを更新
 chrome.webRequest.onCompleted.addListener(
-  (details) => {
-    if (details.statusCode === 200 && details.url.match(/\.(jpeg|jpg|gif|png)$/)) {
-      // 画像をキャッシュ
-      fetch(details.url)
-        .then((response) => response.blob())
-        .then((blob) => {
-          const url = URL.createObjectURL(blob);
-          cache[details.url] = url;
-        });
+  async (details) => {
+    if (details.statusCode === 200) {
+      const url = details.url;
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      
+      // キャッシュに保存
+      cache[url] = objectUrl;
+      localStorage.setItem(cacheKey, JSON.stringify(cache));
     }
   },
-  { urls: ["<all_urls>"] }
+  { urls: ["<all_urls>"], types: ["image"] }
 );
