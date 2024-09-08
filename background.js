@@ -1,4 +1,6 @@
-const DBOpenRequest = window.indexedDB.open("IMG_data_saver");
+const DBname = "IMG_data_saver" 
+const DBvar = 3
+const DBOpenRequest = window.indexedDB.open(DBname, DBvar);
 function get_redirect_url(requestURL) {
 
 }
