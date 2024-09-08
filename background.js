@@ -1,29 +1,21 @@
-const CACHE_NAME = 'imageCache';
+const DBOpenRequest = window.indexedDB.open("IMG_data_saver");
+function get_redirect_url(requestURL) {
 
-// 画像リクエストのリスナー
-self.addEventListener('fetch', (event) => {
-  const url = event.request.url;
+}
 
-  event.respondWith(
-    caches.match(url).then((cachedResponse) => {
-      // キャッシュがあればリターン
-      if (cachedResponse) {
-        return cachedResponse;
-      }
 
-      // リクエストをネットワークへ
-      return fetch(event.request).then((response) => {
-        // レスポンスがキャッシュ可能か確認
-        if (response && response.status === 200) {
-          // キャッシュに保存
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(url, responseClone);
-          });
-        }
-        
-        return response;
-      });
-    })
-  );
-});
+function redirect(requestDetails) {
+  console.log(`Redirecting: ${requestDetails.url}`);
+  if (requestDetails.url === targetUrl) {
+    return;
+  }
+  return {
+    redirectUrl: get_redirect_url(requestDetails.url),
+  };
+}
+
+chrome.webRequest.onBeforeRequest.addListener(
+  redirect,
+  { urls: [pattern], types: ["image"] },
+  ["blocking"],
+);
