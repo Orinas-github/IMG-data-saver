@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Image Cache Saver",
-  "version": "1.0",
+  "version": "0.0.5",
   "permissions": ["storage", "webRequest"],
   "host_permissions": [ 
     "*://*/*"
