@@ -1,13 +1,13 @@
 const DBname = "IMG_data_saver" 
 const DBvar = 1
-const DBRequest = window.indexedDB.open(DBname, DBvar);
+const DBRequest = indexedDB.open(DBname, DBvar);
 
-DBrequest.onerror = (event) => {
+DBRequest.onerror = (event) => {
   console.error(`Database error: ${event.target.errorCode}`);
 };
 
 
-request.onupgradeneeded = (event) => {
+DBRequest.onupgradeneeded = (event) => {
   const db = event.target.result;
   db.createObjectStore("IMG", {keyPath : 'id'})
 };
@@ -28,16 +28,24 @@ function redirect(requestDetails) {
   if (requestDetails.url === targetUrl) {
     return;
   }
+  /*
   return {
     redirectUrl: get_redirect_url(requestDetails.url),
   };
+  */
+ return {
+  redirectUrl: "https://uploads.scratch.mit.edu/get_image/user/121243813_90x90.png"
+ }
 }
 
 chrome.webRequest.onBeforeRequest.addListener(
-  (details) => {  redirect(details),
-  { urls: [pattern], types: ["image"] },
-  ["blocking"] }
+  function(details) {
+    redirect(details)
+  },
+  { urls: ["<all_urls>"], types: ["image"] ,},
+  ["blocking"] 
 );
+
 /*
 chrome.webRequest.onCompleted.addListener(
   (details) => { add_archive(details.url) }
